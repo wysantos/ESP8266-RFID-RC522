@@ -35,9 +35,10 @@ SPI SCK SCK    D5              D5           GPIO-14
 
 #define RST_PIN    D3    
 #define SS_PIN     D8   
-#define LED        D1 //LED & BUZZER
-#define RELE        D2 //LED & BUZZER
-
+#define BUZZER     D1 //BUZZER
+#define RELE       D2 //RELE
+#define BUTTON     D4 //BOTOEIRA
+ 
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
 
 void setup() 
@@ -47,14 +48,33 @@ void setup()
   mfrc522.PCD_Init();   // Inicia MFRC522
   Serial.println("Aproxime o seu cartao do leitor...");
   Serial.println();
-  digitalWrite(D1,LOW);
+  /// digitalWrite(D1,LOW);
   digitalWrite(D2,HIGH);
   pinMode(D1, OUTPUT);
   pinMode(D2, OUTPUT);
+  pinMode(D4, INPUT);
 }
 
 void loop() 
 {
+/*  // faz a leitura do pino D4 (no nosso caso, o botão está ligado nesse pino)
+  byte valor = digitalRead(D4); 
+  // checa se o botão está pressionado
+  if(valor == LOW) {         
+  Serial.print("Abertura manual!");
+  } */
+  if (digitalRead(D4) == LOW) {
+  Serial.print("Abertura manual!");
+  Serial.println();
+  delay(250);
+  Serial.println();
+  tone(D1,4000);  // ATIVA BUZZER   
+  delay(600);    // DELAY / espera 6 segundos
+  noTone(D1);   // DESATIVA BUZZER
+  digitalWrite(D2, LOW);     // ATIVA RELE, abre trava solenoide, etc.
+  delay(2000);              // DELAY /espera 2 segundos
+  digitalWrite(D2, HIGH);  // Desativa RELE, fecha  trava solenoide, ETC.      
+  }
   // Procura por cartao RFID
   if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
@@ -84,9 +104,9 @@ void loop()
   {
     Serial.println("LIBERADO!");
     Serial.println();
-    digitalWrite(D1, HIGH);     // LIGA LED/BUZZER
-    delay(500);              // DELAY /espera 1 segundos
-    digitalWrite(D1, LOW);  // DESlIGA LED/BUZZER
+    tone(D1,4000);  // ATIVA BUZZER   
+    delay(600);    // DELAY / espera 6 segundos
+    noTone(D1);   // DESATIVA BUZZER
     digitalWrite(D2, LOW);     // ATIVA RELE, abre trava solenoide, etc.
     delay(2000);              // DELAY /espera 1 segundos
     digitalWrite(D2, HIGH);  // Desativa RELE, fecha  trava solenoide, ETC.    
@@ -95,8 +115,8 @@ void loop()
   {
     Serial.println("NÃO AUTORIZADO!");
     Serial.println();    
-    digitalWrite(D1, HIGH);     // LIGA LED/BUZZER
-    delay(400);              // DELAY /espera 1 segundos
-    digitalWrite(D1, LOW);  // DESlIGA LED/BUZZER
+    tone(D1,4000);  // ATIVA BUZZER   
+    delay(600);    // DELAY / espera 6 segundos
+    noTone(D1);   // DESATIVA BUZZER
   }
 }
